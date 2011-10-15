@@ -71,9 +71,11 @@
 - (NSString *)text {
     NSMutableString *str = [NSMutableString string];
     for (NSArray *row in [self data]) {
-        for (NSString *col in row) {
+        for (int i=0; i<[row count]; i++) {
+            NSString *col = [row objectAtIndex:i];
             [str appendString:col];
-            if (col != [row lastObject]) {
+            NSLog(@"col: %@", col);
+            if (i < [row count]-1) {
                 [str appendString:@","];
             }
         }
