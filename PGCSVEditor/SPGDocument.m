@@ -33,7 +33,10 @@
 {
     [super windowControllerDidLoadNib:aController];
     [[self tableView] setDelegate:self];
-    [[self tableView] setDataSource:[[SPGCSVAdapter alloc] initWithURL:[self url]]];
+    SPGCSVAdapter *a = [[SPGCSVAdapter alloc] initWithURL:[self url]];
+    [self setAdapter:a];
+    [a release];
+    [[self tableView] setDataSource:a];
     [[self tableView] reloadData];
 }
 

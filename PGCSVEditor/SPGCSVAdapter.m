@@ -69,7 +69,19 @@
 }
 
 - (NSString *)text {
-    
+    NSMutableString *str = [NSMutableString string];
+    for (NSArray *row in [self data]) {
+        for (NSString *col in row) {
+            [str appendString:col];
+            if (col != [row lastObject]) {
+                [str appendString:@","];
+            }
+        }
+        if (row != [[self data] lastObject]) {
+            [str appendString:@"\n"];
+        }
+    }
+    return str;
 }
 
 - (void)dealloc {
