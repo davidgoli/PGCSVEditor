@@ -7,15 +7,17 @@
 //
 
 #import "SPGDocument.h"
+#import "SPGCSVAdapter.h"
 
 @implementation SPGDocument
+@synthesize tableView;
+@synthesize adapter;
+@synthesize url;
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        // Add your subclass-specific initialization here.
-        // If an error occurs here, return nil.
     }
     return self;
 }
@@ -30,35 +32,39 @@
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController
 {
     [super windowControllerDidLoadNib:aController];
-    // Add any code here that needs to be executed once the windowController has loaded the document's window.
+    [[self tableView] setDelegate:self];
+    [[self tableView] setDataSource:[[SPGCSVAdapter alloc] initWithURL:[self url]]];
+    [[self tableView] reloadData];
 }
 
-- (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
-{
-    /*
-     Insert code here to write your document to data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning nil.
-    You can also choose to override -fileWrapperOfType:error:, -writeToURL:ofType:error:, or -writeToURL:ofType:forSaveOperation:originalContentsURL:error: instead.
-    */
-    NSException *exception = [NSException exceptionWithName:@"UnimplementedMethod" reason:[NSString stringWithFormat:@"%@ is unimplemented", NSStringFromSelector(_cmd)] userInfo:nil];
-    @throw exception;
-    return nil;
+
+- (BOOL)readFromURL:(NSURL *)inAbsoluteURL ofType:(NSString *)inTypeName error:(NSError **)outError {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:[inAbsoluteURL path]]) {
+        [self setUrl:inAbsoluteURL];
+        return YES;
+    }
+    return NO;
 }
 
-- (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
-{
-    /*
-    Insert code here to read your document from the given data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning NO.
-    You can also choose to override -readFromFileWrapper:ofType:error: or -readFromURL:ofType:error: instead.
-    If you override either of these, you should also override -isEntireFileLoaded to return NO if the contents are lazily loaded.
-    */
-    NSException *exception = [NSException exceptionWithName:@"UnimplementedMethod" reason:[NSString stringWithFormat:@"%@ is unimplemented", NSStringFromSelector(_cmd)] userInfo:nil];
-    @throw exception;
-    return YES;
+- (BOOL)writeToURL:(NSURL *)inAbsoluteURL ofType:(NSString *)inTypeName error:(NSError **)outError {
+    NSData *data = [[adapter text] dataUsingEncoding:NSUTF8StringEncoding];
+    BOOL writeSuccess = [data writeToURL:inAbsoluteURL
+                                 options:NSAtomicWrite error:outError];
+    return writeSuccess;
 }
 
 + (BOOL)autosavesInPlace
 {
     return YES;
 }
+
+
+- (void)dealloc {
+    [tableView release];
+    [adapter release];
+    [url release];
+    [super dealloc];
+}
+
 
 @end

@@ -8,6 +8,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SPGDocument : NSDocument
+@class SPGCSVAdapter;
+
+@interface SPGDocument : NSDocument <NSTableViewDelegate>
+
+@property (nonatomic, retain) IBOutlet NSTableView *tableView;
+@property (nonatomic, retain) SPGCSVAdapter *adapter;
+@property (nonatomic, copy) NSURL *url;
 
 @end
