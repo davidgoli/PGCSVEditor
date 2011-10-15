@@ -12,25 +12,38 @@
 
 @interface SPGCSVAdapter()
 - (BOOL)cellExistsAtColumn:(NSInteger)colIndex row:(NSInteger)rowIndex;
++ (NSString *)lineEndingsAtPath:(NSURL *)url;
 @end
 
 
 @implementation SPGCSVAdapter
 @synthesize parser;
 @synthesize data;
+@synthesize lineEnding;
 
 - (id)initWithURL:(NSURL *)url {
     if (self = [super init]) {
         parser = [[CSVParser alloc] init];
         [parser openFile:[url path]];
         data = [[parser parseFile] mutableCopy];
+        lineEnding = [[SPGCSVAdapter lineEndingsAtPath:url] copy];
+        NSLog(@"line ending is: %@", [[lineEnding stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"] stringByReplacingOccurrencesOfString:@"\r" withString:@"\\r"]);
     }
     return self;
 }
 
 
++ (NSString *)lineEndingsAtPath:(NSURL *)url {
+    NSString *fileString = [NSString stringWithContentsOfURL:url usedEncoding:nil error:nil];
+    NSCharacterSet *lineEndings = [NSCharacterSet characterSetWithCharactersInString:@"\n\r"];
+    NSRange lineEndingRange = [fileString rangeOfCharacterFromSet:lineEndings];
+    NSRange extent = [fileString rangeOfCharacterFromSet:lineEndings options:nil range:NSMakeRange(lineEndingRange.location+1, 2)];
+    lineEndingRange.length += extent.length;
+    return [fileString substringWithRange:lineEndingRange];
+}
+
+
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView {
-    NSLog(@"count: %lu", [[self data] count]);
     return [[self data] count];
 }
 
@@ -74,13 +87,12 @@
         for (int i=0; i<[row count]; i++) {
             NSString *col = [row objectAtIndex:i];
             [str appendString:col];
-            NSLog(@"col: %@", col);
             if (i < [row count]-1) {
                 [str appendString:@","];
             }
         }
         if (row != [[self data] lastObject]) {
-            [str appendString:@"\n"];
+            [str appendString:lineEnding];
         }
     }
     return str;
@@ -89,6 +101,7 @@
 - (void)dealloc {
     [parser release];
     [data release];
+    [lineEnding release];
     [super dealloc];
 }
 

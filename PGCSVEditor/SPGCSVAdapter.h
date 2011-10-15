@@ -13,6 +13,7 @@
 @interface SPGCSVAdapter : NSObject <NSTableViewDataSource>
 @property (nonatomic, retain) CSVParser *parser;
 @property (nonatomic, retain) NSMutableArray *data;
+@property (nonatomic, copy) NSString *lineEnding;
 
 - (id)initWithURL:(NSURL *)url;
 
